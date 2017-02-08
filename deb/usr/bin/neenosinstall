@@ -458,16 +458,24 @@ nOS_pacchetti=(
 fi
 
 display --to SCREEN --result OK --color GREEN --screen-indent 4 "Updating Operating System" $NC
-apt-get update 
-apt-get dist-upgrade --yes --force-yes
-display --to SCREEN --result OK --color GREEN --screen-indent 4 "Done" $NC
- 
+
+if platform=Debian {
+		apt-get update 
+		apt-get dist-upgrade --yes --force-yes
+		display --to SCREEN --result OK --color GREEN --screen-indent 4 "Done" $NC
+}
+elif {
+	platform=CentOS {
+			yum update 
+			display --to SCREEN --result OK --color GREEN --screen-indent 4 "Done" $NC
+}
+
+fi
 ## Scaricamento pacchetti
     echo -e "${nOS_red}Launching Manual Init ... \n $NC"
     #Aggiorno per sicurezza il sistema
     display --to SCREEN --result OK --color GREEN --screen-indent 4 "Updating Operating System" $NC
-    apt-get update > /dev/null 2>&1 & spinner
-    apt-get dist-upgrade --yes --force-yes 
+    
     
     # Calcolo il numero di pacchetti da installare ##################################
     pacchetto=0
@@ -479,12 +487,20 @@ display --to SCREEN --result OK --color GREEN --screen-indent 4 "Done" $NC
             for pacchetto in ${!nOS_pacchetti[@]}
                     do 
 		    	#Check se il pacchetto è gia installato
+
+			if platform=Debian {	
 			CHECK_INSTALL=$(dpkg-query --show -f='${Status}\n' ${nOS_pacchetti[pacchetto]}  |  awk '{printf $1 awk}')
 			if [ "$CHECK_INSTALL" = "install" ]; then
 				display --to SCREEN --result SKIPPING --color YELLOW --screen-indent 4 "${nOS_pacchetti[pacchetto]}" $NC
 					else
 				DEBIAN_FRONTEND=noninteractive apt-get install -qqy ${nOS_pacchetti[pacchetto]} > /dev/null 2>&1 & spinner
-            	        	display --to SCREEN --result INSTALLING --color GREEN --screen-indent 4 "${nOS_pacchetti[pacchetto]}" $NC			
+            	        	display --to SCREEN --result INSTALLING --color GREEN --screen-indent 4 "${nOS_pacchetti[pacchetto]}" $NC
+			}
+			elif {
+				platform=CentOS {	
+					CHECK_INSTALL=$(rpm -qa | grep ${nOS_pacchetti[pacchetto]} )
+				}
+			}	
 			fi
     	    done
 	    echo ""
