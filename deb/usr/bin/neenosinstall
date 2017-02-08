@@ -466,7 +466,7 @@ if platform=Debian {
 }
 elif {
 	platform=CentOS {
-			yum update 
+			yum update -y
 			display --to SCREEN --result OK --color GREEN --screen-indent 4 "Done" $NC
 }
 
