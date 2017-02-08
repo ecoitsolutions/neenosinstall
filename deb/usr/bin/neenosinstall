@@ -3,6 +3,22 @@
 # neenOsInstaller -- Installa il sistema operativo sencondo le specifiche
 # fornite nella wiki : http://wiki.neen.it/index.php/Installazione_server_linux
 # Copyright (c), Luigi Molinaro (luigi.molinaro AT neen DOT it)
+# Forked by Lucian Lazar (lucian.lazar@ecoit.ro)
+
+
+# INIZIALIZZO LA PLATFORM
+platform=''
+
+if [ -f /etc/debian_version ]; 
+	then
+		platform=Debian
+elif [ -f /etc/redhat-release ];
+	then
+		platform=CentOS
+else
+		platform=Sconosciuto
+		exit 1
+fi
 
 #VARIABILI INIT
 nOS_INIT=0
@@ -11,6 +27,7 @@ nOS_ZEND=0
 nOS_VIRTUALMIN=0
 nOS_NGINX=0
 NEENWEBSERVER='init'
+
 ####################
 #COLORI 
 ####################
@@ -355,6 +372,8 @@ os-check() {
                 OSVERSION="precise"
         elif [[ `lsb_release -rs` == "14.04" ]] ; then
                 OSVERSION="trusty"
+		elif [[ `lsb_release -rs` == "16.04" ]] ; then
+                OSVERSION="xenial"
         else
                 echo "error : OS not supported"
                 exit 0
@@ -377,7 +396,8 @@ spinner()
 }
 
 initunmanaged() {
-#Pacchetti da Installare 
+	if platform=Debian {
+#Pacchetti da Installare su Debian/Ubuntu
 nOS_pacchetti=(
 	'rpl'
 	'ipcalc' 
@@ -391,7 +411,7 @@ nOS_pacchetti=(
 	'vim'
 	'bmon'
 	'postfix'
-        'mailutils'
+     'mailutils'
 	'sysstat'
 	'iptraf'
 	'tcpdump'
@@ -413,6 +433,29 @@ nOS_pacchetti=(
 	'autoconf'
 	'etckeeper'
 )
+	}
+elif platform=Centos {
+	#Pacchetti da Installare su CentOS/RedHat
+nOS_pacchetti=(
+	'epel-release'
+	'ipcalc' 
+	'nmap'
+	'traceroute'
+	'htop'
+	'ntp'
+	'mc'
+	'vim'
+	'postfix'
+    'mailutils'
+	'sysstat'
+	'tcpdump'
+	'fail2ban' 	
+	'git'
+	'autoconf'
+	'etckeeper'
+)
+} 
+fi
 
 display --to SCREEN --result OK --color GREEN --screen-indent 4 "Updating Operating System" $NC
 apt-get update 
